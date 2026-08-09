@@ -43,7 +43,7 @@ router = APIRouter(
 )
 def create_user_endpoint(
     user_data: UserCreate,
-    _: Annotated[
+    current_user: Annotated[
         User,
         Depends(require_super_admin),
     ],
@@ -54,6 +54,7 @@ def create_user_endpoint(
 ):
     return create_user(
         db,
+        current_user,
         user_data,
     )
 
@@ -117,7 +118,7 @@ def get_user_endpoint(
 def update_user_endpoint(
     user_id: int,
     user_data: UserUpdate,
-    _: Annotated[
+    current_user: Annotated[
         User,
         Depends(require_super_admin),
     ],
@@ -135,6 +136,7 @@ def update_user_endpoint(
         db,
         target_user,
         user_data,
+        current_user,
     )
 
 
@@ -200,7 +202,7 @@ def deactivate_user_endpoint(
 )
 def activate_user_endpoint(
     user_id: int,
-    _: Annotated[
+    current_user: Annotated[
         User,
         Depends(require_super_admin),
     ],
@@ -216,6 +218,7 @@ def activate_user_endpoint(
 
     return activate_user(
         db,
+        current_user,
         target_user,
     )
 

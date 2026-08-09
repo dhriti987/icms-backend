@@ -13,6 +13,7 @@ from app.schemas.user import UserCreate, UserUpdate
 
 def create_user(
     db: Session,
+    current_user: User,
     user_data: UserCreate,
 ) -> User:
     existing_username = db.scalar(
@@ -39,6 +40,7 @@ def create_user(
         password_hash=hash_password(user_data.password),
         user_type=user_data.user_type,
         is_active=True,
+        created_by=current_user.id,
     )
 
     db.add(user)
@@ -92,6 +94,7 @@ def update_user(
     db: Session,
     target_user: User,
     user_data: UserUpdate,
+    current_user: User,
 ) -> User:
     if user_data.username is not None:
         existing_username = db.scalar(
@@ -124,11 +127,27 @@ def update_user(
             )
 
         target_user.email = user_data.email
+    target_user.updated_by = current_user.id
 
     db.commit()
     db.refresh(target_user)
 
     return target_user
+
+
+def delete_user(
+    db: Session,
+    current_user: User,
+    target_user: User,
+) -> None:
+    if current_user.id == target_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You cannot delete your own account.",
+        )
+
+    db.delete(target_user)
+    db.commit()
 
 
 def deactivate_user(
@@ -149,6 +168,7 @@ def deactivate_user(
         )
 
     target_user.is_active = False
+    target_user.updated_by = current_user.id
 
     db.commit()
     db.refresh(target_user)
@@ -158,6 +178,7 @@ def deactivate_user(
 
 def activate_user(
     db: Session,
+    current_user: User,
     target_user: User,
 ) -> User:
     if target_user.is_active:
@@ -167,6 +188,7 @@ def activate_user(
         )
 
     target_user.is_active = True
+    target_user.updated_by = current_user.id
 
     db.commit()
     db.refresh(target_user)
