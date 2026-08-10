@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from app.api.routes.auth import router as auth_router
 from app.api.routes.users import router as users_router
 from app.api.routes.permissions import router as permissions_router
+from app.api.routes.category import router as category_router
+from app.api.routes.platform import router as platform_router
 
 
 app = FastAPI(
@@ -30,15 +32,15 @@ def health_check():
 #         "result": value,
 #     }
 
-app.include_router(
+routers = [
     auth_router,
-    prefix="/api/v1",
-)
-app.include_router(
     users_router,
-    prefix="/api/v1",
-)
-app.include_router(
     permissions_router,
-    prefix="/api/v1",
-)
+    platform_router,
+    category_router,
+]
+for router in routers:
+    app.include_router(
+        router,
+        prefix="/api/v1",
+    )

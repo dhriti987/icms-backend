@@ -83,7 +83,7 @@ def list_users_endpoint(
 
 @router.get(
     "/{user_id}",
-    response_model=UserResponse,
+    response_model=UserDetailResponse,
 )
 def get_user_endpoint(
     user_id: int,
